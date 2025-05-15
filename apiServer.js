@@ -90,16 +90,16 @@ app.post('/verifyUserCredential', async (req, res) => {
 	}
 });
 
-app.post('/findUser', async (req, res) => {
+app.get('/findUser', async (req, res) => {
 
-	console.log("POST request received : " + JSON.stringify(req.body) + "\n");
+	console.log("GET request received : " + JSON.stringify(req.query.email) + "\n");
 
-	const userData = req.body;
+	const userEmail = req.query.email;
 
 	try {
-		const user = await userCollection.findOne({email:userData.email});
+		const user = await userCollection.findOne({email: userEmail});
 		res.status(200).send(user || {});
-	} catch (error) {
+	} catch (err) {
 		res.status(500).json({ message: "Server error", error: err });
 	}
 	
@@ -115,7 +115,7 @@ app.post('/createNewUser', async (req, res) => {
 		const reply = await userCollection.insertOne(signupData);
 		res.status(200).send(reply);
 
-	} catch (error) {
+	} catch (err) {
 		res.status(500).json({ message: "Server error", error: err });
 	}
 })
@@ -135,7 +135,7 @@ app.get('/getOrderList', async (req, res) => {
 
         res.status(200).json(ordersList);
 
-	} catch (error) {
+	} catch (err) {
 		res.status(500).json({ message: "Server error", error: err })
 	}
 })
@@ -167,13 +167,9 @@ app.delete('/deleteOrders', async (req, res) => {
 	
 	try {
 		const result = await orderCollection.deleteMany({customerEmail: email});
-		
-		if (result.deletedCount === 0) {
-			return res.status(404).json({ message: 'No past orders available to delete' });
-		}
 
 		res.status(200).json({ message: 'Successfully deleted past orders.', deletedOrdersCount: result.deletedCount });
-	} catch (error) {
+	} catch (err) {
 		res.status(500).json({ message: "Server error", error: err });
 	}
 })
